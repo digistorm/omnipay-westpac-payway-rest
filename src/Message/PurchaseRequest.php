@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Omnipay\WestpacPaywayRest\Message;
 
 use Money\Currencies\ISOCurrencies;
@@ -11,7 +13,7 @@ use Money\Money;
  */
 class PurchaseRequest extends AbstractRequest
 {
-    public function getData()
+    public function getData(): array
     {
         $this->validate(
             'customerNumber',
@@ -20,9 +22,9 @@ class PurchaseRequest extends AbstractRequest
         );
 
         $data = [
-            'customerNumber'  => $this->getCustomerNumber(),
+            'customerNumber' => $this->getCustomerNumber(),
             'transactionType' => 'payment',
-            'currency'        => $this->getCurrency(),
+            'currency' => $this->getCurrency(),
         ];
 
         // Has the Money class been used to set the amount?
@@ -39,27 +41,27 @@ class PurchaseRequest extends AbstractRequest
         if ($this->getMerchantId()) {
             $data['merchantId'] = $this->getMerchantId();
         }
-        if ($this->getSingleUseTokenId()){
+        if ($this->getSingleUseTokenId()) {
             $data['singleUseTokenId'] = $this->getSingleUseTokenId();
         }
-        if ($this->getCustomerIpAddress()){
+        if ($this->getCustomerIpAddress()) {
             $data['customerIpAddress'] = $this->getCustomerIpAddress();
         }
 
         return $data;
     }
 
-    public function getEndpoint()
+    public function getEndpoint(): string
     {
         return $this->endpoint . '/transactions';
     }
 
-    public function getHttpMethod()
+    public function getHttpMethod(): string
     {
         return 'POST';
     }
 
-    public function getUseSecretKey()
+    public function getUseSecretKey(): bool
     {
         return true;
     }

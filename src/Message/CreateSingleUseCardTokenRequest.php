@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Omnipay\WestpacPaywayRest\Message;
 
 use Omnipay\Common\Exception\InvalidRequestException;
@@ -9,7 +11,7 @@ use Omnipay\Common\Exception\InvalidRequestException;
  */
 class CreateSingleUseCardTokenRequest extends AbstractRequest
 {
-    public function getData()
+    public function getData(): array
     {
         if (!$this->getParameter('card')) {
             throw new InvalidRequestException('You must pass a "card" parameter.');
@@ -18,7 +20,7 @@ class CreateSingleUseCardTokenRequest extends AbstractRequest
         $this->getCard()->validate();
 
         // PayWay requires two digit expiry month.
-        $expiryDateMonth = str_pad($this->getCard()->getExpiryMonth(), 2, 0, STR_PAD_LEFT);
+        $expiryDateMonth = str_pad((string) $this->getCard()->getExpiryMonth(), 2, '0', STR_PAD_LEFT);
 
         return [
             'paymentMethod' => 'creditCard',
@@ -30,15 +32,12 @@ class CreateSingleUseCardTokenRequest extends AbstractRequest
         ];
     }
 
-    /**
-     * @return mixed
-     */
-    public function getEndpoint()
+    public function getEndpoint(): string
     {
         return $this->endpoint . '/single-use-tokens';
     }
 
-    public function getHttpMethod()
+    public function getHttpMethod(): string
     {
         return 'POST';
     }

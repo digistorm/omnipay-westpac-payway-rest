@@ -1,153 +1,159 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Omnipay\WestpacPaywayRest\Message;
 
 use Omnipay\Common\Message\AbstractResponse;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 /**
  * Response class for all WestpacPaywayRest requests
  */
 class Response extends AbstractResponse
 {
-    /** @var string Request ID */
-    protected $requestId = null;
-    /** @var string HTTP response code */
-    protected $httpResponseCode = null;
-    /** @var string Transaction type */
-    protected $transactionType = null;
+    protected string $requestId;
+
+    protected string $httpResponseCode;
+
+    protected string $transactionType;
 
     /**
      * Is the transaction successful?
-     * @return boolean True if successful
+     * @return bool True if successful
      */
-    public function isSuccessful()
+    public function isSuccessful(): bool
     {
         // get response code
         $code = $this->getHttpResponseCode();
 
-        if ($code === 200) {  // OK
+        if ($code === '200') {  // OK
             return true;
         }
 
-        if ($code === 201) {   // Created
+        if ($code === '201') {   // Created
             if ($this->getTransactionType() === 'payment') {
                 return $this->isApproved();
             }
+
             return true;
         }
 
-        if ($code === 202 && $this->isPending()) {   // Accepted
-            return true;
-        }
-
-        return false;
+        // Accepted
+        return $code === '202' && $this->isPending();
     }
 
     /**
      * Is the transaction approved?
-     * @return boolean True if approved
      */
-    public function isApproved()
+    public function isApproved(): bool
     {
-        return in_array($this->getStatus(), array(
-            'approved',
-            'approved*',
-        ));
+        return in_array($this->getStatus(), ['approved', 'approved*']);
     }
 
     /**
      * Is the transaction pending?
-     * @return boolean True if pending
      */
-    public function isPending()
+    public function isPending(): bool
     {
-        return (
-            $this->getTransactionType() === 'payment'
-            && $this->getStatus() === 'pending'
-        );
+        return $this->getTransactionType() === 'payment' && $this->getStatus() === 'pending';
     }
 
     /**
      * Get Transaction ID
-     * @return string|null
      */
-    public function getTransactionId()
+    public function getTransactionId(): ?string
     {
-        return $this->getData('transactionId');
+        return (string) $this->getDataItem('transactionId');
     }
 
     /**
      * Get Transaction reference
-     * @return string Payway transaction reference
      */
-    public function getTransactionReference()
+    public function getTransactionReference(): ?string
     {
-        return $this->getData('receiptNumber');
+        return (string) $this->getDataItem('receiptNumber');
     }
 
     /**
      * Get Customer Number
-     * @return string|null
      */
-    public function getCustomerNumber()
+    public function getCustomerNumber(): ?string
     {
-        return $this->getData('customerNumber');
+        return (string) $this->getDataItem('customerNumber');
     }
 
     /**
      * Get Contact details
-     * @return array Customer contact
      */
-    public function getContact()
+    public function getContact(): array
     {
-        return $this->getData('contact');
+        return $this->getDataItemArray('contact');
     }
 
     /**
      * Get status
-     * @return array Returned status
      */
-    public function getStatus()
+    public function getStatus(): string
     {
-        return $this->getData('status');
+        return (string) $this->getDataItem('status');
+    }
+
+    public function getDataItemArray(string $key): ?array
+    {
+        $item = $this->getData()[$key] ?? null;
+        if (!(is_array($item) || is_null($item))) {
+            throw new \InvalidArgumentException("Data item $key is not an array");
+        }
+
+        return $item;
+    }
+
+    public function getDataItem(string $key): bool|string|int|float|null
+    {
+        $item = $this->getData()[$key] ?? null;
+        if (!(is_scalar($item) || is_null($item))) {
+            throw new \InvalidArgumentException("Data item $key is not a scalar value");
+        }
+
+        return $item;
     }
 
     /**
      * Get response data, optionally by key
-     * @param  string       $key Data array key
-     * @return string|array      Response data item or all data if no key specified
      */
-    public function getData($key = null)
+    public function getData(): array
     {
-        if ($key) {
-            return isset($this->data[$key]) ? $this->data[$key] : null;
-        }
         return $this->data;
+    }
+
+    public function getErrorDataItem(string $key): bool|string|int|float|null
+    {
+        $data = $this->getErrorData();
+        if (!(is_scalar($data[$key]) || is_null($data[$key]))) {
+            throw new \InvalidArgumentException("Error data item $key is not a scalar value");
+        }
+
+        return $data[$key] ?? null;
     }
 
     /**
      * Get error data from response
-     * @param  string       $key Optional data key
-     * @return string|array      Response error item or all data if no key
      */
-    public function getErrorData($key = null)
+    public function getErrorData(): ?array
     {
         if ($this->isSuccessful()) {
             return null;
         }
+
         // get error data (array in data)
-        $data = isset($this->getData('data')[0]) ? $this->getData('data')[0] : null;
-        if ($key) {
-            return isset($data[$key]) ? $data[$key] : null;
-        }
-        return $data;
+        return $this->getDataItemArray('data')[0] ?? null;
     }
 
     /**
      * Get error message from the response
-     * @return string|null Error message or null if successful
      */
-    public function getMessage()
+    public function getMessage(): ?string
     {
         if ($this->getErrorMessage()) {
             return $this->getErrorMessage() . ' (' . $this->getErrorFieldName() . ')';
@@ -156,17 +162,17 @@ class Response extends AbstractResponse
         if ($this->isSuccessful()) {
             return ($this->getStatus()) ? ucfirst($this->getStatus()) : 'Successful';
         }
+
         // default to unsuccessful message
         return 'The transaction was unsuccessful.';
     }
 
     /**
      * Get code
-     * @return string|null Error message or null if successful
      */
-    public function getCode()
+    public function getCode(): ?string
     {
-        return join(' ', [
+        return implode(' ', [
             $this->getResponseCode(),
             $this->getResponseText(),
             '(' . $this->getHttpResponseCode(),
@@ -176,138 +182,127 @@ class Response extends AbstractResponse
 
     /**
      * Get error message from the response
-     * @return string|null Error message or null if successful
      */
-    public function getErrorMessage()
+    public function getErrorMessage(): ?string
     {
-        return $this->getErrorData('message');
+        return (string) $this->getErrorDataItem('message');
     }
 
     /**
      * Get field name in error from the response
-     * @return string|null Error message or null if successful
      */
-    public function getErrorFieldName()
+    public function getErrorFieldName(): ?string
     {
-        return $this->getErrorData('fieldName');
+        return (string) $this->getErrorDataItem('fieldName');
     }
 
     /**
      * Get field value in error from the response
-     * @return string|null Error message or null if successful
      */
-    public function getErrorFieldValue()
+    public function getErrorFieldValue(): ?string
     {
-        return $this->getErrorData('fieldValue');
+        return (string) $this->getErrorDataItem('fieldValue');
     }
 
     /**
      * Get Payway Response Code
-     * @return string Returned response code
      */
-    public function getResponseCode()
+    public function getResponseCode(): string
     {
-        return $this->getData('responseCode');
+        return (string) $this->getDataItem('responseCode');
     }
 
     /**
      * Get Payway Response Text
-     * @return string Returned response Text
      */
-    public function getResponseText()
+    public function getResponseText(): string
     {
-        return $this->getData('responseText');
+        return (string) $this->getDataItem('responseText');
     }
 
-    /**
-     * @return string
-     */
-    public function getRequestId()
+    public function getRequestId(): string
     {
         return $this->requestId;
     }
 
     /**
      * Set request id
-     * @return AbstractRequest provides a fluent interface.
      */
-    public function setRequestId($requestId)
+    public function setRequestId(string $requestId): self
     {
         $this->requestId = $requestId;
+
+        return $this;
     }
 
     /**
      * Get HTTP Response Code
-     * @return string
      */
-    public function getHttpResponseCode()
+    public function getHttpResponseCode(): string
     {
         return $this->httpResponseCode;
     }
 
     /**
      * Set HTTP Response Code
-     * @parm string Response Code
      */
-    public function setHttpResponseCode($value)
+    public function setHttpResponseCode(int $value): self
     {
-        $this->httpResponseCode = $value;
+        $this->httpResponseCode = (string) $value;
+
+        return $this;
     }
 
     /**
      * Get HTTP Response code text
-     * @return string
      */
-    public function getHttpResponseCodeText()
+    public function getHttpResponseCodeText(): ?string
     {
         $code = $this->getHttpResponseCode();
-        $statusTexts = \Symfony\Component\HttpFoundation\Response::$statusTexts;
+        $statusTexts = SymfonyResponse::$statusTexts;
 
-        return (isset($statusTexts[$code])) ? $statusTexts[$code] : null;
+        return $statusTexts[$code] ?? null;
     }
 
     /**
      * Get transaction type
-     * @return string|null Transaction type
      */
-    public function getTransactionType()
+    public function getTransactionType(): ?string
     {
-        return $this->getData('transactionType');
+        return (string) $this->getDataItem('transactionType');
     }
 
     /**
      * Get payment method
-     * @return string|null Payment method
      */
-    public function getPaymentMethod()
+    public function getPaymentMethod(): ?string
     {
-        return $this->getData('paymentMethod');
+        return (string) $this->getDataItem('paymentMethod');
     }
 
     /**
      * Get credit card information
-     * @return string|null Transaction credit card details
      */
-    public function getCreditCard()
+    public function getCreditCard(): ?string
     {
-        return $this->getData('creditCard');
+        return (string) $this->getDataItem('creditCard');
     }
 
     /**
      * Get bank account information
-     * @return string|null Transaction bank account details
      */
-    public function getBankAccount()
+    public function getBankAccount(): ?string
     {
-        return $this->getData('bankAccount');
+        return (string) $this->getDataItem('bankAccount');
     }
 
     /**
      * Set Transaction Type
-     * @return string|null Transaction type
      */
-    public function setTransactionType($value)
+    public function setTransactionType(string $value): self
     {
-        return $this->transactionType = $value;
+        $this->transactionType = $value;
+
+        return $this;
     }
 }

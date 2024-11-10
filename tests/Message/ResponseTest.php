@@ -1,20 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Omnipay\WestpacPaywayRest\Test\Message;
 
 use Omnipay\Tests\TestCase;
-use Omnipay\WestpacPaywayRest\Message\Response;
 
 class ResponseTest extends TestCase
 {
-    public function testPurchaseSuccess()
+    public function testPurchaseSuccess(): void
     {
         $this->markTestIncomplete('Need to get success response');
 
         // TODO implement
     }
 
-    public function testPurchaseFailure()
+    public function testPurchaseFailure(): void
     {
         $this->markTestIncomplete('Need to get failure response');
 
