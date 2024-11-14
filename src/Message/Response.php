@@ -103,7 +103,7 @@ class Response extends AbstractResponse
     {
         $item = $this->getData()[$key] ?? null;
         if (!(is_array($item) || is_null($item))) {
-            throw new \InvalidArgumentException("Data item $key is not an array");
+            throw new InvalidArgumentException("Data item $key is not an array");
         }
 
         return $item;
@@ -113,7 +113,7 @@ class Response extends AbstractResponse
     {
         $item = $this->getData()[$key] ?? null;
         if (!(is_scalar($item) || is_null($item))) {
-            throw new \InvalidArgumentException("Data item $key is not a scalar value");
+            throw new InvalidArgumentException("Data item $key is not a scalar value");
         }
 
         return $item;
