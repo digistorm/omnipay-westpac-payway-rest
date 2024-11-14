@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Omnipay\WestpacPaywayRest\Message;
 
+use InvalidArgumentException;
 use Omnipay\Common\Message\AbstractResponse;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
@@ -20,7 +21,6 @@ class Response extends AbstractResponse
 
     /**
      * Is the transaction successful?
-     * @return bool True if successful
      */
     public function isSuccessful(): bool
     {
@@ -131,7 +131,7 @@ class Response extends AbstractResponse
     {
         $data = $this->getErrorData();
         if (!(is_scalar($data[$key]) || is_null($data[$key]))) {
-            throw new \InvalidArgumentException("Error data item $key is not a scalar value");
+            throw new InvalidArgumentException("Error data item $key is not a scalar value");
         }
 
         return $data[$key] ?? null;

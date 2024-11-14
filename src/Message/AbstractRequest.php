@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Omnipay\WestpacPaywayRest\Message;
 
 use Money\Money;
+use Omnipay\Common\Message\AbstractRequest as CommonAbstractRequest;
 use Omnipay\Common\Message\ResponseInterface;
 
 /**
  * @link https://www.payway.com.au/rest-docs/index.html
  */
-abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
+abstract class AbstractRequest extends CommonAbstractRequest
 {
     protected string $endpoint = 'https://api.payway.com.au/rest/v1';
 
@@ -75,7 +76,7 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
     /**
      * Set Use Secret Key setting
      */
-    public function setUseSecretKey(string $value): self
+    public function setUseSecretKey(string|bool $value): self
     {
         return $this->setParameter('useSecretKey', (bool) $value);
     }
@@ -172,7 +173,7 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
      * @param string $value
      * @return $this
      */
-    public function setCurrency($value): self
+    public function setCurrency(string $value): self
     {
         return $this->setParameter('currency', $value);
     }
