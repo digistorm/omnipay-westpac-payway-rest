@@ -13,7 +13,7 @@ use Omnipay\Common\Message\ResponseInterface;
  */
 abstract class AbstractRequest extends CommonAbstractRequest
 {
-    protected string $endpoint = 'https://api.payway.com.au/rest/v1';
+    protected const ENDPOINT = 'https://api.payway.com.au/rest/v1';
 
     abstract public function getEndpoint(): string;
 
@@ -173,7 +173,7 @@ abstract class AbstractRequest extends CommonAbstractRequest
      * @param string $value
      * @return $this
      */
-    public function setCurrency(string $value): self
+    public function setCurrency($value): self
     {
         return $this->setParameter('currency', $value);
     }

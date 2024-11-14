@@ -34,7 +34,7 @@ class CreateSingleUseCardTokenRequest extends AbstractRequest
 
     public function getEndpoint(): string
     {
-        return $this->endpoint . '/single-use-tokens';
+        return self::ENDPOINT . '/single-use-tokens';
     }
 
     public function getHttpMethod(): string
