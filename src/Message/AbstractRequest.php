@@ -1,217 +1,218 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Omnipay\WestpacPaywayRest\Message;
+
+use Money\Money;
+use Omnipay\Common\Message\AbstractRequest as CommonAbstractRequest;
+use Omnipay\Common\Message\ResponseInterface;
 
 /**
  * @link https://www.payway.com.au/rest-docs/index.html
  */
-abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
+abstract class AbstractRequest extends CommonAbstractRequest
 {
-    /** @var string Endpoint URL */
-    protected $endpoint = 'https://api.payway.com.au/rest/v1';
+    protected const ENDPOINT = 'https://api.payway.com.au/rest/v1';
 
-    abstract public function getEndpoint();
+    abstract public function getEndpoint(): string;
 
     /**
      * Get API publishable key
-     * @return string
      */
-    public function getApiKeyPublic()
+    public function getApiKeyPublic(): ?string
     {
         return $this->getParameter('apiKeyPublic');
     }
 
     /**
      * Set API publishable key
-     * @param  string $value API publishable key
      */
-    public function setApiKeyPublic($value)
+    public function setApiKeyPublic(string $value): self
     {
         return $this->setParameter('apiKeyPublic', $value);
     }
 
     /**
      * Get API secret key
-     * @return string
      */
-    public function getApiKeySecret()
+    public function getApiKeySecret(): ?string
     {
         return $this->getParameter('apiKeySecret');
     }
 
     /**
      * Set API secret key
-     * @param  string $value API secret key
      */
-    public function setApiKeySecret($value)
+    public function setApiKeySecret(string $value): self
     {
         return $this->setParameter('apiKeySecret', $value);
     }
 
     /**
      * Get Merchant
-     * @return string Merchant ID
      */
-    public function getMerchantId()
+    public function getMerchantId(): ?string
     {
         return $this->getParameter('merchantId');
     }
 
     /**
      * Set Merchant
-     * @param  string $value Merchant ID
      */
-    public function setMerchantId($value)
+    public function setMerchantId(string $value): self
     {
         return $this->setParameter('merchantId', $value);
     }
 
     /**
      * Get Use Secret Key setting
-     * @return bool Use secret API key if true
      */
-    public function getUseSecretKey()
+    public function getUseSecretKey(): ?bool
     {
-        return $this->getParameter('useSecretKey');
+        return (bool) $this->getParameter('useSecretKey');
     }
 
     /**
      * Set Use Secret Key setting
-     * @param  string $value Flag to use secret key
      */
-    public function setUseSecretKey($value)
+    public function setUseSecretKey(string|bool $value): self
     {
-        return $this->setParameter('useSecretKey', $value);
+        return $this->setParameter('useSecretKey', (bool) $value);
     }
 
     /**
      * Get single-use token
-     * @return string Token key
      */
-    public function getSingleUseTokenId()
+    public function getSingleUseTokenId(): ?string
     {
         return $this->getParameter('singleUseTokenId');
     }
 
     /**
      * Set single-use token
-     * @param  string $value Token Key
      */
-    public function setSingleUseTokenId($value)
+    public function setSingleUseTokenId(string $value): self
     {
         return $this->setParameter('singleUseTokenId', $value);
     }
 
     /**
      * Get Idempotency Key
-     * @return string Idempotency Key
      */
-    public function getIdempotencyKey()
+    public function getIdempotencyKey(): ?string
     {
         return $this->getParameter('idempotencyKey') ?: uniqid();
     }
 
     /**
      * Set Idempotency Key
-     * @param  string $value Idempotency Key
      */
-    public function setIdempotencyKey($value)
+    public function setIdempotencyKey(string $value): self
     {
         return $this->setParameter('idempotencyKey', $value);
     }
 
-    public function getCustomerNumber()
+    public function getCustomerNumber(): ?string
     {
         return $this->getParameter('customerNumber');
     }
 
-    public function setCustomerNumber($value)
+    public function setCustomerNumber(string $value): self
     {
         return $this->setParameter('customerNumber', $value);
     }
 
-    public function getTransactionType()
+    public function getTransactionType(): ?string
     {
         return $this->getParameter('transactionType');
     }
 
-    public function setTransactionType($value)
+    public function setTransactionType(string $value): self
     {
         return $this->setParameter('transactionType', $value);
     }
 
-    public function getAmount()
+    public function getAmount(): string|Money|null
     {
         return $this->getParameter('amount');
     }
 
-    public function setAmount($value)
+    /**
+     * Retaining the original method signature, although we use the method incorrectly by allowing Money param
+     * @see \Omnipay\Common\Message\AbstractRequest::setAmount
+     * @param string|null|Money $value
+     * @return $this
+     */
+    public function setAmount($value): self
     {
         return $this->setParameter('amount', $value);
     }
 
-    public function getPrincipalAmount()
+    public function getPrincipalAmount(): ?string
     {
         return $this->getParameter('principalAmount');
     }
 
-    public function setPrincipalAmount($value)
+    public function setPrincipalAmount(string $value): self
     {
         return $this->setParameter('principalAmount', $value);
     }
 
-    public function getCurrency()
+    public function getCurrency(): ?string
     {
         // PayWay expects lowercase currency values
         return ($this->getParameter('currency'))
-            ? strtolower($this->getParameter('currency'))
+            ? strtolower((string) $this->getParameter('currency'))
             : null;
     }
 
-    public function setCurrency($value)
+    /**
+     * Retaining the original method signature
+     *
+     * @param string $value
+     * @return $this
+     */
+    public function setCurrency($value): self
     {
         return $this->setParameter('currency', $value);
     }
 
-    public function getOrderNumber()
+    public function getOrderNumber(): ?string
     {
         return $this->getParameter('orderNumber');
     }
 
-    public function setOrderNumber($value)
+    public function setOrderNumber(string $value): self
     {
         return $this->setParameter('orderNumber', $value);
     }
 
-    public function getCustomerIpAddress()
+    public function getCustomerIpAddress(): ?string
     {
         return $this->getParameter('customerIpAddress');
     }
 
-    public function setCustomerIpAddress($value)
+    public function setCustomerIpAddress(string $value): self
     {
         return $this->setParameter('customerIpAddress', $value);
     }
 
     /**
      * Get HTTP method
-     * @return string HTTP method (GET, PUT, etc)
      */
-    public function getHttpMethod()
+    public function getHttpMethod(): string
     {
         return 'GET';
     }
 
     /**
      * Get request headers
-     * @return array Request headers
      */
-    public function getRequestHeaders()
+    public function getRequestHeaders(): array
     {
         // common headers
-        $headers = array(
-            'Accept' => 'application/json',
-        );
+        $headers = ['Accept' => 'application/json'];
 
         // set content type
         if ($this->getHttpMethod() !== 'GET') {
@@ -228,12 +229,8 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
 
     /**
      * Send data request
-     *
-     * @param $data
-     *
-     * @return \Omnipay\Common\Message\ResponseInterface|\Omnipay\WestpacPaywayRest\Message\Response
      */
-    public function sendData($data)
+    public function sendData(mixed $data): ResponseInterface
     {
         // get the appropriate API key
         $apiKey = ($this->getUseSecretKey()) ? $this->getApiKeySecret() : $this->getApiKeyPublic();
