@@ -17,7 +17,7 @@ class Response extends AbstractResponse
 
     protected string $httpResponseCode;
 
-    protected string $transactionType;
+    protected ?string $transactionType;
 
     /**
      * Is the transaction successful?
@@ -129,8 +129,8 @@ class Response extends AbstractResponse
 
     public function getErrorDataItem(string $key): bool|string|int|float|null
     {
-        $data = $this->getErrorData();
-        if (!(is_scalar($data[$key]) || is_null($data[$key]))) {
+        $item = $this->getData()[$key] ?? null;
+        if (!(is_scalar($item) || is_null($item))) {
             throw new InvalidArgumentException("Error data item $key is not a scalar value");
         }
 
@@ -299,7 +299,7 @@ class Response extends AbstractResponse
     /**
      * Set Transaction Type
      */
-    public function setTransactionType(string $value): self
+    public function setTransactionType(?string $value): self
     {
         $this->transactionType = $value;
 
